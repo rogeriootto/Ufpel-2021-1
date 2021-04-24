@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+//STRUCT DO NÓ COM OS DADOS
 typedef struct No{
 
     char nome[10];
@@ -12,6 +13,7 @@ typedef struct No{
 
 } No;
 
+// LA SENTINELA GUIA
 typedef struct Ward{
 
     No *start;
