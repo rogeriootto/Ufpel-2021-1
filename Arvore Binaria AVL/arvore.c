@@ -5,7 +5,6 @@
 typedef struct {
 
     int chave;
-    int dado;
 
 } Registro;
 
@@ -17,9 +16,9 @@ typedef struct No {
     struct No *pDir;
 
 }No;
+
 int insere (No **ppRaiz, Registro reg);
-void registrarDado (Registro *reg, int random);
-void registrarChave (Registro *reg, int i);
+void registrarChave (Registro *reg, int random);
 No *criaNodo(void);
 
 int main () {
@@ -38,8 +37,7 @@ int main () {
         random = rand()%1000; // Gerando valores aleatórios na faixa de 0 a 1000
         printf("%d ", random);
 
-        registrarDado(&reg, random); //Registra o i como dado para ver a ordem de inserção dps (acho)
-        registrarChave(&reg, i); //Registra a chave com a posição na arvore
+        registrarChave(&reg, random); //Registra a chave com a posição na arvore
 
         insere(&pRaiz, reg); //Insere o numero na arvore
 
@@ -66,7 +64,7 @@ int insere (No **ppRaiz, Registro reg) {
         return 1;
 
     }
-    else if ((*ppRaiz)->reg.chave > reg.chave) {
+    else if ((*ppRaiz)->reg.chave > reg.chave) { // Fica recursando até chegar na folha
 
         if ( insere (&(*ppRaiz), reg) ) {
 
@@ -85,12 +83,8 @@ int insere (No **ppRaiz, Registro reg) {
     }
 }
 
-void registrarDado (Registro *reg, int random) {
-    reg->dado = random;
-}
-
-void registrarChave (Registro *reg, int i) {
-    reg->chave = i + 1;
+void registrarChave (Registro *reg, int random) {
+    reg->chave = random;
 }
 
 int FB (No *pRaiz) {
