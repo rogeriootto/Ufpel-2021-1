@@ -5,6 +5,7 @@
 typedef struct {
 
     int chave;
+    int dado;
 
 } Registro;
 
@@ -17,9 +18,20 @@ typedef struct No {
 
 }No;
 
+//Funções de "Inserção"
 int insere (No **ppRaiz, Registro reg);
-void registrarChave (Registro *reg, int random);
+void registrarChave (Registro *reg, int i);
 No *criaNodo(void);
+
+//BALANCEAMENTO
+int balanceamento(No **ppRaiz);
+int balancaEsquerda (No **ppRaiz);
+int balancaDireita (No **ppRaiz);
+void RSE (No **ppRaiz);
+void RSD (No **ppRaiz);
+int FB (No *pRaiz);
+int Altura (No *pRaiz);
+
 
 int main () {
 
@@ -64,7 +76,7 @@ int insere (No **ppRaiz, Registro reg) {
         return 1;
 
     }
-    else if ((*ppRaiz)->reg.chave > reg.chave) { // Fica recursando até chegar na folha
+    else if ((*ppRaiz)->reg.chave > reg.chave) {
 
         if ( insere (&(*ppRaiz), reg) ) {
 
@@ -86,6 +98,9 @@ int insere (No **ppRaiz, Registro reg) {
 void registrarChave (Registro *reg, int random) {
     reg->chave = random;
 }
+
+
+//-----------------------FUNÇÕES DE BALANCEAMENTO-----------------------//
 
 int FB (No *pRaiz) {
     if (pRaiz == NULL) {
@@ -111,5 +126,120 @@ int Altura (No *pRaiz) {
     }
     else {
         return iDir + 1;
+    }
+}
+
+int balanceamento(No **ppRaiz) {
+
+    int fb;
+    fb = FB(*ppRaiz);
+    if (fb > 1) {
+        return balancaEsquerda(ppRaiz);
+
+    }
+    else if (fb < -1){
+        return balancaDireita(ppRaiz);
+
+    }
+    else {
+        return 0;
+    }
+
+}
+
+int balancaEsquerda (No **ppRaiz) {
+
+    int fbe;
+    fbe = FB( (*ppRaiz)->pEsq );
+
+    if (fbe > 0) {
+
+        RSD(ppRaiz);
+
+        return 1;
+
+    }
+    else if (fbe < 0) { // Rotação dupla para a Direita
+
+        RSE ( &((*ppRaiz)->pEsq) );
+        RSD (ppRaiz);
+
+        return 1;
+
+    }
+    return 0;
+}
+
+void RSE (No **ppRaiz) { // ROTAÇÃO SIMPLES PARA DIREITA
+
+    No *pAux;
+
+    pAux = (*ppRaiz)->pDir;
+    (*ppRaiz)->pDir = pAux->pEsq;
+    pAux->pEsq = (*ppRaiz);
+    (*ppRaiz) = pAux;
+    return;
+
+}
+
+int balancaDireita (No **ppRaiz) {
+
+    int fbd;
+    fbd = FB( (*ppRaiz)->pDir );
+    
+    if (fbd < 0) {
+
+        RSE (ppRaiz);
+
+        return 1;
+    }
+    else if (fbd > 0) { // ROTAÇÃO SIMPLES PARA ESQUERDA
+
+        RSD ( &((*ppRaiz)->pDir) );
+        RSE (ppRaiz);
+
+        return 1;
+    }
+    return 0;
+
+}
+
+void RSD (No **ppRaiz) {
+
+    No *pAux;
+
+    pAux = (*ppRaiz)->pEsq;
+    (*ppRaiz)->pEsq = (*ppRaiz)->pDir;
+    (*ppRaiz)->pDir = (*ppRaiz);
+    (*ppRaiz) = pAux;
+    return;
+
+}
+
+int verificaAVL (No *pRaiz) {
+
+    int fb;
+
+    if (pRaiz == NULL) {
+        return 1;
+    }
+
+    if (!verificaAVL(pRaiz->pEsq)) {
+        return 0;
+    }
+
+    if (!verificaAVL(pRaiz->pDir)) {
+        return 0;
+    }
+
+    fb = FB (pRaiz);
+
+    if ( (fb > 1) || (fb < -1) ) {
+        return 0;
+
+    }
+    else {
+        return 1;
+
     }
 }
