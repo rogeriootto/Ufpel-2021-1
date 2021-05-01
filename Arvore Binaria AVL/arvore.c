@@ -5,7 +5,6 @@
 typedef struct {
 
     int chave;
-    int dado;
 
 } Registro;
 
@@ -20,8 +19,10 @@ typedef struct No {
 
 //Funções de "Inserção"
 int insere (No **ppRaiz, Registro reg);
-void registrarChave (Registro *reg, int i);
+void registrarChave (Registro *reg);
+void listarArvore (No *pRaiz);
 No *criaNodo(void);
+void limparArvore (No *pRaiz);
 
 //BALANCEAMENTO
 int balanceamento(No **ppRaiz);
@@ -30,13 +31,13 @@ int balancaDireita (No **ppRaiz);
 void RSE (No **ppRaiz);
 void RSD (No **ppRaiz);
 int FB (No *pRaiz);
-int Altura (No *pRaiz);
+int altura (No *pRaiz);
+int verificaAVL (No *pRaiz);
 
 
 int main () {
 
-    srand(time(NULL)); // Gera numeros aleatórios não repetidos
-    int i, random, nNodos;
+    int i, nNodos;
     No *pRaiz = NULL;
     Registro reg;
 
@@ -46,20 +47,72 @@ int main () {
     
     for (i=0; i < nNodos; i++){
         
-        random = rand()%1000; // Gerando valores aleatórios na faixa de 0 a 1000
-        printf("%d ", random);
-
-        registrarChave(&reg, random); //Registra a chave com a posição na arvore
-
+        registrarChave(&reg);
         insere(&pRaiz, reg); //Insere o numero na arvore
 
     }
+    printf("\n");
+    listarArvore(pRaiz);
+    printf("\n");
+
+    if(verificaAVL(pRaiz)) {
+        printf("\nA arvore eh AVL\n");
+    }
+    else {
+        printf("\nNao eh AVL\n");
+    }
+
+    
+
+    limparArvore(pRaiz);
+
+    return 0;
 
 }
+
+void registrarChave (Registro *reg) {
+
+    int random;
+
+    srand(time(0)); // Gera numeros aleatórios não repetidos
+    
+    random = rand()%1000;
+    printf("%d, ", random);
+    reg->chave = random;
+
+}
+
+void limparArvore (No *pRaiz) {
+    if (pRaiz == NULL) {
+        return;
+    }
+
+    limparArvore(pRaiz->pEsq);
+    limparArvore(pRaiz->pDir);
+
+    free(pRaiz);
+}
+
+void listarArvore (No *pRaiz) {
+
+    if (pRaiz != NULL) {
+        printf("%d(", pRaiz->reg.chave);
+        listarArvore(pRaiz->pEsq);
+        listarArvore(pRaiz->pDir);
+        printf(")");
+    }
+
+}
+
 No *criaNodo(void) {
     No *nNodo = NULL;
 
     nNodo = (No*)malloc(sizeof(No));
+
+    if (!nNodo) {
+        printf("\nAlgum erro ao alocar a memoria\n");
+        exit(1);
+    }
 
     nNodo->pEsq = NULL;
     nNodo->pDir = NULL;
@@ -67,38 +120,42 @@ No *criaNodo(void) {
     return nNodo;
 }
 
-int insere (No **ppRaiz, Registro reg) {
+int insere (No **ppRaiz, Registro nReg) {
 
-    if (*ppRaiz == NULL) { // Se é uma folha ele insere
+    if (*ppRaiz == NULL) {
 
         *ppRaiz = criaNodo();
-        (*ppRaiz)->reg = reg;
+        (*ppRaiz)->reg = nReg;
+
         return 1;
-
     }
-    else if ((*ppRaiz)->reg.chave > reg.chave) {
+    else if ( nReg.chave < (*ppRaiz)->reg.chave ) {
 
-        if ( insere (&(*ppRaiz), reg) ) {
-
+        if ( insere( &(*ppRaiz)->pEsq, nReg ) ){
             if (balanceamento(ppRaiz)) {
                 return 0;
-
             }
             else {
                 return 1;
-
+            }
+        }
+    }
+    else if ( nReg.chave > (*ppRaiz)->reg.chave) {
+        if ( insere (&(*ppRaiz)->pDir, nReg) ) {
+            if (balanceamento(ppRaiz)) {
+                return 0;
+            }
+            else {
+                return 1;
             }
         }
     }
     else {
-        return 0; // Valor já esta presente
+        return 0;
     }
-}
 
-void registrarChave (Registro *reg, int random) {
-    reg->chave = random;
+    return 0;
 }
-
 
 //-----------------------FUNÇÕES DE BALANCEAMENTO-----------------------//
 
@@ -107,10 +164,10 @@ int FB (No *pRaiz) {
         return 0;
     }
 
-    return Altura(pRaiz->pEsq) - Altura(pRaiz->pDir);
+    return altura(pRaiz->pEsq) - altura(pRaiz->pDir);
 }
 
-int Altura (No *pRaiz) {
+int altura (No *pRaiz) {
 
     int iEsq, iDir;
 
@@ -118,8 +175,8 @@ int Altura (No *pRaiz) {
         return 0;
     }
 
-    iEsq = Altura(pRaiz->pEsq);
-    iDir = Altura(pRaiz->pDir);
+    iEsq = altura(pRaiz->pEsq);
+    iDir = altura(pRaiz->pDir);
 
     if (iEsq > iDir){
         return iEsq + 1;
@@ -133,6 +190,7 @@ int balanceamento(No **ppRaiz) {
 
     int fb;
     fb = FB(*ppRaiz);
+
     if (fb > 1) {
         return balancaEsquerda(ppRaiz);
 
@@ -172,13 +230,12 @@ int balancaEsquerda (No **ppRaiz) {
 
 void RSE (No **ppRaiz) { // ROTAÇÃO SIMPLES PARA DIREITA
 
-    No *pAux;
+    No *pAux = NULL;
 
     pAux = (*ppRaiz)->pDir;
     (*ppRaiz)->pDir = pAux->pEsq;
     pAux->pEsq = (*ppRaiz);
     (*ppRaiz) = pAux;
-    return;
 
 }
 
@@ -206,13 +263,12 @@ int balancaDireita (No **ppRaiz) {
 
 void RSD (No **ppRaiz) {
 
-    No *pAux;
+    No *pAux = NULL;
 
     pAux = (*ppRaiz)->pEsq;
     (*ppRaiz)->pEsq = (*ppRaiz)->pDir;
-    (*ppRaiz)->pDir = (*ppRaiz);
+    pAux->pDir = (*ppRaiz);
     (*ppRaiz) = pAux;
-    return;
 
 }
 
