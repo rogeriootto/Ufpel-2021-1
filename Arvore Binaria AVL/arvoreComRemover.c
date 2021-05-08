@@ -329,14 +329,14 @@ int balancaEsquerda (No **ppRaiz) {
     int fbe;
     fbe = FB( (*ppRaiz)->pEsq );
 
-    if (fbe > 0) {
+    if (fbe >= 0) {
 
         RSD(ppRaiz);
 
         return 1;
 
     }
-    else if (fbe < 0) { // Rotação dupla para a Direita
+    else if (fbe <= 0) { // Rotação dupla para a Direita
 
         RSE ( &((*ppRaiz)->pEsq) );
         RSD (ppRaiz);
@@ -363,13 +363,13 @@ int balancaDireita (No **ppRaiz) {
     int fbd;
     fbd = FB( (*ppRaiz)->pDir );
     
-    if (fbd < 0) {
+    if (fbd <= 0) {
 
         RSE (ppRaiz);
 
         return 1;
     }
-    else if (fbd > 0) { 
+    else if (fbd >= 0) { 
 
         RSD ( &((*ppRaiz)->pDir) );
         RSE (ppRaiz);
