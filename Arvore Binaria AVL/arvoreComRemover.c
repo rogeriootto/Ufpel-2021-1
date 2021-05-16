@@ -16,13 +16,13 @@ typedef struct No {
 
 }No;
 
-//Funções de "Inserção"
-int insere (No **ppRaiz, Registro reg);
-void registrarChave (Registro *reg);
+//Funções de inserção e remoção
+int insere (No **ppRaiz, int reg);
 void listarArvore (No *pRaiz);
 No *criaNodo(void);
 void limparArvore (No *pRaiz);
 int remover (No **ppRaiz, int dado);
+No *procuraNoMenor (No *atual);
 
 //BALANCEAMENTO
 int balanceamento(No **ppRaiz);
@@ -33,14 +33,11 @@ void RSD (No **ppRaiz);
 int FB (No *pRaiz);
 int altura (No *pRaiz);
 int verificaAVL (No *pRaiz);
-No *procuraNoMenor (No *atual);
-
 
 int main () {
 
-    int sel = 0, nRemove = 0;
+    int sel = 0, nRemove = 0, reg = 0;
     No *pRaiz = NULL;
-    Registro reg;
 
     do {
 
@@ -58,7 +55,9 @@ int main () {
 
             case 1:
 
-                registrarChave(&reg);
+                printf("\nDigite o dado a ser inserido: ");
+                scanf("%d", &reg);
+                getchar();
                 insere(&pRaiz, reg); //Insere o numero na arvore
 
             break;
@@ -76,6 +75,7 @@ int main () {
             case 3:
 
                 listarArvore(pRaiz);
+                printf("\n");
 
             break;
             
@@ -108,14 +108,6 @@ int main () {
 
 }
 
-void registrarChave (Registro *reg) {
-
-    printf("\nDigite o dado a ser inserido: ");
-    scanf("%d", &reg->chave);
-    getchar();
-
-}
-
 void limparArvore (No *pRaiz) {
     if (pRaiz == NULL) {
         return;
@@ -135,7 +127,7 @@ void listarArvore (No *pRaiz) {
         listarArvore(pRaiz->pDir);
         printf(")");
     }
-    printf("\n");
+
 }
 
 No *criaNodo(void) {
@@ -154,16 +146,16 @@ No *criaNodo(void) {
     return nNodo;
 }
 
-int insere (No **ppRaiz, Registro nReg) {
+int insere (No **ppRaiz, int nReg) {
 
     if (*ppRaiz == NULL) {
 
         *ppRaiz = criaNodo();
-        (*ppRaiz)->reg = nReg;
+        (*ppRaiz)->reg.chave = nReg;
 
         return 1;
     }
-    else if ( nReg.chave < (*ppRaiz)->reg.chave ) {
+    else if ( nReg < (*ppRaiz)->reg.chave ) {
 
         if ( insere( &(*ppRaiz)->pEsq, nReg ) ){
             if (balanceamento(ppRaiz)) {
@@ -174,7 +166,7 @@ int insere (No **ppRaiz, Registro nReg) {
             }
         }
     }
-    else if ( nReg.chave > (*ppRaiz)->reg.chave) {
+    else if ( nReg > (*ppRaiz)->reg.chave) {
         if ( insere (&(*ppRaiz)->pDir, nReg) ) {
             if (balanceamento(ppRaiz)) {
                 return 0;
@@ -182,6 +174,9 @@ int insere (No **ppRaiz, Registro nReg) {
             else {
                 return 1;
             }
+        }
+        else {
+            return 0;
         }
     }
     else {
@@ -194,6 +189,7 @@ int insere (No **ppRaiz, Registro nReg) {
 int remover (No **ppRaiz, int dado) {
     int resposta;
     if (*ppRaiz == NULL) { // Arvore Vazia
+        printf("\nArvore está vazia;\n");
         return 0;
     }
     else if ( dado < (*ppRaiz)->reg.chave){
@@ -215,7 +211,7 @@ int remover (No **ppRaiz, int dado) {
         }
     }
     else if (( dado > (*ppRaiz)->reg.chave)) {
-        if ( (resposta = remover ( &(*ppRaiz)->pEsq, dado)) == 1) {
+        if ( (resposta = remover ( &(*ppRaiz)->pDir, dado)) == 1) {
             if (FB((*ppRaiz)) >= 2) {
                 if(altura((*ppRaiz)->pEsq->pDir) <= altura ((*ppRaiz)->pEsq->pEsq)) {
 
@@ -307,8 +303,7 @@ int altura (No *pRaiz) {
 
 int balanceamento(No **ppRaiz) {
 
-    int fb;
-    fb = FB(*ppRaiz);
+    int fb = FB(*ppRaiz);
 
     if (fb > 1) {
         return balancaEsquerda(ppRaiz);
@@ -326,8 +321,7 @@ int balanceamento(No **ppRaiz) {
 
 int balancaEsquerda (No **ppRaiz) {
 
-    int fbe;
-    fbe = FB( (*ppRaiz)->pEsq );
+    int fbe = FB( (*ppRaiz)->pEsq );
 
     if (fbe >= 0) {
 
@@ -336,7 +330,7 @@ int balancaEsquerda (No **ppRaiz) {
         return 1;
 
     }
-    else if (fbe <= 0) { // Rotação dupla para a Direita
+    else if (fbe < 0) { // Rotação dupla para a Direita
 
         RSE ( &((*ppRaiz)->pEsq) );
         RSD (ppRaiz);
@@ -347,9 +341,9 @@ int balancaEsquerda (No **ppRaiz) {
     return 0;
 }
 
-void RSE (No **ppRaiz) { 
+void RSE (No** ppRaiz) { // ROTAÇÃO SIMPLES PARA DIREITA
 
-    No *pAux = NULL;
+    No *pAux;
 
     pAux = (*ppRaiz)->pDir;
     (*ppRaiz)->pDir = pAux->pEsq;
@@ -360,8 +354,7 @@ void RSE (No **ppRaiz) {
 
 int balancaDireita (No **ppRaiz) {
 
-    int fbd;
-    fbd = FB( (*ppRaiz)->pDir );
+    int fbd = FB( (*ppRaiz)->pDir );
     
     if (fbd <= 0) {
 
@@ -369,7 +362,7 @@ int balancaDireita (No **ppRaiz) {
 
         return 1;
     }
-    else if (fbd >= 0) { 
+    else if (fbd > 0) { // ROTAÇÃO DUPLA PARA ESQUERDA
 
         RSD ( &((*ppRaiz)->pDir) );
         RSE (ppRaiz);
@@ -382,10 +375,10 @@ int balancaDireita (No **ppRaiz) {
 
 void RSD (No **ppRaiz) {
 
-    No *pAux = NULL;
+    No *pAux;
 
     pAux = (*ppRaiz)->pEsq;
-    (*ppRaiz)->pEsq = (*ppRaiz)->pDir;
+    (*ppRaiz)->pEsq = pAux->pDir;
     pAux->pDir = (*ppRaiz);
     (*ppRaiz) = pAux;
 
