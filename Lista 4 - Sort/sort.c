@@ -58,7 +58,7 @@ int main () {
 
             case 3:
 
-                quickSort(vetor, 0, nVetor);
+                quickSort(vetor, 0, nVetor-1);
                 listarVetor(vetor, nVetor);
 
             break;
@@ -176,8 +176,7 @@ void quickSort (int *vetor, int left, int right) {
     i = left;
     j = right;
 
-    //pivo = data[left + (rand() % right)]; descobrir como fazer aleatorio mais tarde
-    pivo = vetor[(left + right)/2];
+    pivo = vetor[left + (rand() % right)]; // RANDOM FUNCIONOU NEM ACREDITO
 
     do {
 
