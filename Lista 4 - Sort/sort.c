@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <sys/time.h>
 
 void listarVetor ( int *vetor, int nVetor);
 int limparVetor(int *vetor);
@@ -8,11 +9,14 @@ int verificaOrdem (int *vetor, int nVetor);
 void insertionSort(int *p, int n);
 void selectionSort (int *vetor, int nVetor);
 void quickSort (int *data, int left, int right);
-void mergeSort();
+void mergeSort(int *vetor, int start, int end);
+void merge (int *vetor, int start, int mid, int end);
+float time_diff(struct timeval *start, struct timeval *end);
 
 int main () {
 
     int nVetor = 0, sel = 0, *vetor, i;
+    struct timeval begin, end;
     srand(time(NULL));
     
     do {
@@ -44,34 +48,52 @@ int main () {
 
             case 1:
 
+                gettimeofday(&begin, NULL);
                 insertionSort (vetor, nVetor);
+                gettimeofday(&end, NULL);
                 listarVetor(vetor, nVetor);
-
+                printf("\nDemorou %f segundos para executar o insertion sort;\n", time_diff(&begin, &end));
+                
             break;
 
             case 2:
 
+                gettimeofday(&begin, NULL);
                 selectionSort (vetor, nVetor);
+                gettimeofday(&end, NULL);
                 listarVetor(vetor, nVetor);
+                printf("\nDemorou %f segundos para executar o selection sort;\n", time_diff(&begin, &end));
 
             break;
 
             case 3:
 
+                gettimeofday(&begin, NULL);
                 quickSort(vetor, 0, nVetor-1);
+                gettimeofday(&end, NULL);
                 listarVetor(vetor, nVetor);
+                printf("\nDemorou %f segundos para executar o quick sort;\n", time_diff(&begin, &end));
 
             break;
 
             case 4:
 
-                mergeSort();
+                gettimeofday(&begin, NULL);
+                mergeSort(vetor, 0, nVetor-1);
+                gettimeofday(&end, NULL);
+                listarVetor(vetor, nVetor);
+                printf("\nDemorou %f segundos para executar o merge sort;\n", time_diff(&begin, &end));
 
             break;
 
             case 5:
 
-                verificaOrdem (vetor, nVetor);
+                if ( verificaOrdem (vetor, nVetor-1) ) {
+                    printf("\nOrdenacao esta correta!\n");
+                }
+                else {
+                    printf("\nOrdenacao esta errada!\n");
+                }
 
             break;
 
@@ -125,11 +147,22 @@ int limparVetor(int *vetor) {
 }
 
 int verificaOrdem (int *vetor, int nVetor) {
-    int i;
-    for (i = 0; i < nVetor; i++) {
-        
-    }
 
+    int flag = 0, i;
+
+    for (i=0; i < nVetor; i++) {
+
+        if(vetor[i] > vetor[i+1]) {
+            flag++;
+        }
+
+    }
+    if (flag == 0) {
+        return 1;
+    }
+    else {
+        return 0;
+    }
 }
 
 void insertionSort(int *vetor, int nVetor) {
@@ -151,7 +184,7 @@ void selectionSort (int *vetor, int nVetor) {
 
     int min, temp, i, j, min_id;
 
-    for (i=0; i < nVetor-1; i++) {
+    for (i=0; i < (nVetor-1); i++) {
 
         min = vetor[i];
 
@@ -176,7 +209,8 @@ void quickSort (int *vetor, int left, int right) {
     i = left;
     j = right;
 
-    pivo = vetor[left + (rand() % right)]; // RANDOM FUNCIONOU NEM ACREDITO
+    //pivo = vetor[left + (rand() % right)]; // RANDOM FUNCIONOU NEM ACREDITO; FUNCIONOU PORCARIA NENHUMA;
+    pivo = vetor[(left + right)/2];
 
     do {
 
@@ -205,11 +239,66 @@ void quickSort (int *vetor, int left, int right) {
     }
 }
 
-void mergeSort() {
+void mergeSort(int *vetor, int start, int end) {
 
-//    if (strlen(m) <= 1) {
-//        return m;
-//    }
+    if (start < end) {
 
-//    int *esquerda, *direita, meio = strlen(m)/2;
+        int mid;
+
+        mid = start + (end - start)/2;
+
+        mergeSort(vetor, start, mid);
+        mergeSort(vetor, mid +1, end);
+
+        merge (vetor, start, mid, end);
+    }
+
+}
+
+void merge (int *vetor, int start, int mid, int end) {
+    
+    int *temp, p1, p2, tam, i, j, k;
+    int end1 = 0, end2 = 0;
+    tam = end-start+1;
+    p1 = start;
+    p2 = mid +1;
+
+    temp = (int *)malloc(tam * sizeof(int));
+    if (temp != NULL) {
+        for(i=0; i < tam; i++) {
+            if( (!end1) && (!end2) ) {
+
+                if (vetor[p1] < vetor[p2]) {
+                    temp[i] = vetor[p1++];
+                }
+                else {
+                    temp[i] = vetor[p2++];
+                }
+
+                if(p1>mid) {
+                    end1=1;
+                }
+                if(p2>end) {
+                    end2=1;
+                }
+            }
+            else {
+                if(!end1) {
+                    temp[i] = vetor[p1++];
+                }
+                else {
+                    temp[i] = vetor[p2++];
+                }
+            }
+        }
+        for(j=0, k=start; j < tam; j++, k++) {
+            vetor[k] = temp[j];
+        }
+    }
+
+    free (temp);
+}
+float time_diff(struct timeval *start, struct timeval *end) {
+
+    return (end->tv_sec - start->tv_sec) + 1e-6*(end->tv_usec - start->tv_usec);
 }
