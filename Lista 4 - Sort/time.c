@@ -1,7 +1,8 @@
 #include <stdio.h>
 #include <time.h>
- int main()
- {
+
+int main() {
+ 
     time_t begin,end;
     long i;
     begin= time(NULL);
@@ -10,4 +11,5 @@
     printf("for loop used %f seconds to complete the " \
            "execution\n", difftime(end, begin));
     return 0;
+ 
 }
