@@ -28,12 +28,12 @@ int main () {
 
             vetor = malloc(sizeof(int) * nVetor);
             for (i = 0; i < nVetor; i++) {
-                vetor[i] = rand () % 1000;
+                vetor[i] = rand ();
             }
         }
 
         printf("\n -- Escolha o metodo de Ordenacao --\n");
-        printf("\n1) Insetion Sort;");
+        printf("\n1) Insertion Sort;");
         printf("\n2) Selection Sort;");
         printf("\n3) Quick Sort;");
         printf("\n4) Merge Sort;");
@@ -144,6 +144,7 @@ int limparVetor(int *vetor) {
 
     free(vetor);
     return 0;
+
 }
 
 int verificaOrdem (int *vetor, int nVetor) {
@@ -182,7 +183,7 @@ void insertionSort(int *vetor, int nVetor) {
 
 void selectionSort (int *vetor, int nVetor) {
 
-    int min, temp, i, j, min_id;
+    int min, temp, i, j, min_id = 0;
 
     for (i=0; i < (nVetor-1); i++) {
 
@@ -209,8 +210,8 @@ void quickSort (int *vetor, int left, int right) {
     i = left;
     j = right;
 
-    //pivo = vetor[left + (rand() % right)]; // RANDOM FUNCIONOU NEM ACREDITO; FUNCIONOU PORCARIA NENHUMA;
-    pivo = vetor[(left + right)/2];
+    pivo = vetor[ left + (rand() % ( right - left))]; // RANDOM FUNCIONOU NEM ACREDITO; FUNCIONOU PORCARIA NENHUMA;
+    // FUNCIONOU!!;
 
     do {
 
@@ -298,6 +299,7 @@ void merge (int *vetor, int start, int mid, int end) {
 
     free (temp);
 }
+
 float time_diff(struct timeval *start, struct timeval *end) {
 
     return (end->tv_sec - start->tv_sec) + 1e-6*(end->tv_usec - start->tv_usec);
